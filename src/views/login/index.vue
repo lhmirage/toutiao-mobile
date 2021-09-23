@@ -94,9 +94,10 @@ export default {
         const { data } = await login(this.user)
         // 4处理响应结果
         Toast.success('登陆成功')
-
         // 将后端返回的token放到vuex中
         this.$store.commit('setUser', data)
+        // 跳转回原来界面
+        this.$router.back()
       } catch (err) {
         console.log('登陆失败', err)
         Toast.fail('登陆失败')
