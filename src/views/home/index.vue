@@ -10,20 +10,42 @@
       </van-button>
     </van-nav-bar>
 
-    <van-tabs class="channel-tabs" v-model="active">
+    <van-tabs class="channel-tabs"
+              v-model="active">
       <van-tab :title="channel.name"
                :key="channel.id"
                v-for="channel in channels">
-               <article-list :channel="channel" />
-               </van-tab>
+        <article-list :channel="channel" />
+      </van-tab>
+
+<!-- 按钮挡住最后的元素，只能够在这里添加一个占位元素 -->
+      <div slot="nav-right" class="wap-nav-placeholder"></div>
+      <div slot="nav-right"
+           @click="isChannelEditShow = true"
+           class="wap-nav-wrap">
+        <van-icon name="wap-nav" />
+      </div>
     </van-tabs>
 
+    <!-- 文章频道列表 -->
+    <van-popup v-model="isChannelEditShow"
+               position="bottom"
+               class="channel-edit-popup"
+               closeable
+               close-icon-position="top-left"
+               get-container="body"
+               style="height: 100%">
+      <channel-edit
+        :user-channels="channels"
+      />
+    </van-popup>
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list'
+import ChannelEdit from './components/channel-edit'
 export default {
   name: 'First',
   props: {
@@ -35,7 +57,8 @@ export default {
   data () {
     return {
       active: 0, // 控制被激活的标签
-      channels: [] // 频道列表
+      channels: [], // 频道列表
+      isChannelEditShow: true // 控制编辑频道的显示状态
     }
   },
   created () {
@@ -48,7 +71,8 @@ export default {
     }
   },
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   }
 }
 </script>
@@ -81,6 +105,36 @@ export default {
       width: 15px !important;
       height: 3px;
       background: #3296fa;
+    }
+  }
+
+  .wap-nav-placeholder {
+    width: 33px;
+    flex-shrink: 0;
+  }
+
+  .wap-nav-wrap {
+    position: fixed;
+    right: 0;
+    width: 33px;
+    height: 43px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.9;
+    .van-icon {
+      font-size: 24px;
+    }
+    &:before {
+      content: "";
+      width: 1px;
+      height: 43px;
+      // background: url("./line.png ") no-repeat;
+      background-size: contain;
+      position: absolute;
+      left: 0;
+      top: 0;
     }
   }
 }
