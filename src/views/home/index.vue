@@ -40,6 +40,7 @@
         :user-channels="channels"
         @close="isChannelEditShow = false"
         @update-active="active = $event"
+        :active="active"
       />
     </van-popup>
   </div>
@@ -49,6 +50,9 @@
 import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list'
 import ChannelEdit from './components/channel-edit'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
+
 export default {
   name: 'First',
   props: {
@@ -69,8 +73,24 @@ export default {
   },
   methods: {
     async loadChannels () {
-      const { data } = await getUserChannels()
-      this.channels = data.data.channels
+      let channels = []
+      if (this.user) {
+        const { data } = await getUserChannels()
+        channels = data.data.channels
+      } else {
+        // 没有登陆，判断本地存储
+        const localChannels = getItem('user-channels')
+
+        if (localChannels) {
+          // 如果有本地存储则使用
+          channels = localChannels
+        } else {
+          // 用户没有登录，也没有本地存储，就用默认的
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        }
+      }
+      this.channels = channels
     }
 
     // onUpdateActive (index) {
@@ -80,6 +100,9 @@ export default {
   components: {
     ArticleList,
     ChannelEdit
+  },
+  computed: {
+    ...mapState(['user'])
   }
 }
 </script>

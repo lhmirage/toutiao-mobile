@@ -12,11 +12,12 @@
     </van-cell>
     <van-grid :gutter="10">
       <van-grid-item class="grid-item"
+                     :class="{ active: index === active }"
                      :icon="(isEdit && index !== 0)? 'clear' : ''"
                      v-for="(channel, index) in userChannels"
                      :key="index"
                      text="channel.name"
-                     @click="onUserChannelClick(index)" />
+                     @click="onUserChannelClick(channel, index)" />
     </van-grid>
 
     <van-cell center
@@ -35,13 +36,19 @@
 </template>
 
 <script>
-import { getAllChannels } from '@/api/channel'
+import { getAllChannels, addUserChannel, deleteUserChannel } from '@/api/channel'
+import { mapState } from 'vuex'
+import { setItem } from '@/utils/storage'
 
 export default {
   name: 'ChannelEdit',
   props: {
     userChannels: {
       type: Array,
+      require: true
+    },
+    active: {
+      type: Number,
       require: true
     }
   },
@@ -60,34 +67,57 @@ export default {
       this.allChannels = data.data.channels
     },
 
-    onAdd (channel) {
+    async onAdd (channel) {
       this.userChannels.push(channel)// 计算属性会依赖用到的属性的变化而变化
 
       // 频道数据持久化
+      if (this.user) {
+        await addUserChannel({
+          channels: [
+            { id: channel.id, seq: this.userChannels.length }
+          ]
+        })
+        // 登录了数据存储在线上
+      } else {
+        setItem('user-channels', this.userChannels)
+      }
     },
 
-    onUserChannelClick (index) {
+    onUserChannelClick (channel, index) {
       if (this.isEdit && index !== 0) {
       // 编辑状态，删除频道
-        this.deleteChannel(index)
+        this.deleteChannel(channel, index)
       } else {
       // 非编辑状态，切换频道
         this.switchChannel(index)
       }
     },
 
-    deleteChannel (index) {
+    async deleteChannel (channel, index) {
+      // 如果删除的是当前激活频道之前的频道
+      if (index <= this.active) {
+        // 更新激活频道的索引
+        this.$emit('update-active', this.active - 1)
+      }
       this.userChannels.splice(index, 1)
 
       // 数据持久化
+      if (this.user) {
+        await deleteUserChannel(channel.id)
+      } else {
+        setItem('user-channels', this.userChannels)
+      }
     },
 
     switchChannel (index) {
+      // 切换频道
+      this.$emit('update-active', index)
       // 关闭弹出层
       this.$emit('close')
     }
   },
   computed: {
+    ...mapState(['user']),
     // 推荐的频道列表
     recommandChannels () {
       // 思路：所有频道-我的频道=剩下频道
@@ -132,6 +162,12 @@ export default {
       top: -5px;
       font-size: 20px;
       color: #ccc;
+    }
+  }
+
+  .active {
+    /deep/ .van-grid-item__text {
+      color: red !important;
     }
   }
 }
