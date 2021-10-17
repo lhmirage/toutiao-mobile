@@ -6,7 +6,8 @@
                   icon="search"
                   type="info"
                   round
-                  size="small">搜索
+                  size="small"
+                  to="/search">搜索
       </van-button>
     </van-nav-bar>
 
