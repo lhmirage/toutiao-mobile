@@ -6,35 +6,40 @@
                  left-arrow
                  @click-left="$router.back()" />
 
-    <h1 class="title">{{ article.title }}</h1>
-    <van-cell center
-              class="user-info">
-      <div slot="title"
-           class="name">{{ article.aut_name }}</div>
-      <van-image slot="icon"
-                 round
-                 fit="cover"
-                 :src="article.aut_photo" />
-      <div slot="label"
-           class="pubdate">{{ article.pubdate | relativeTime }}</div>
-      <van-button class="follow-btn"
-                  :type="article.is_followed ? 'default' :'info'"
-                  :icon="article.is_followed ? '' :'plus'"
-                  @click="onFollow"
-                  :loading="isFollowLoading"
-                  round
-                  size="small">{{ article.is_followed ? '已关注' : '关注'}}</van-button>
+    <div class="article-wrap">
+      <h1 class="title">{{ article.title }}</h1>
+      <van-cell center
+                class="user-info">
+        <div slot="title"
+             class="name">{{ article.aut_name }}</div>
+        <van-image slot="icon"
+                   round
+                   fit="cover"
+                   :src="article.aut_photo" />
+        <div slot="label"
+             class="pubdate">{{ article.pubdate | relativeTime }}</div>
+        <van-button class="follow-btn"
+                    :type="article.is_followed ? 'default' :'info'"
+                    :icon="article.is_followed ? '' :'plus'"
+                    @click="onFollow"
+                    :loading="isFollowLoading"
+                    round
+                    size="small">{{ article.is_followed ? '已关注' : '关注'}}</van-button>
 
-    </van-cell>
-    <div class="markdown-body"
-         v-html="article.content"
-         ref="article-content">
+      </van-cell>
+      <div class="markdown-body"
+           v-html="article.content"
+           ref="article-content">
+      </div>
+      <!-- 文章评论列表 -->
+      <comment-list :source="articleId" />
     </div>
 
     <!-- 底部区域 -->
     <div class="article-bottom">
       <van-button class="comment-btn"
                   type="default"
+                  @click="isPostShow = true"
                   round
                   size="small">写评论</van-button>
       <van-icon name="comment-o"
@@ -49,7 +54,15 @@
       <van-icon name="share"
                 color="#777777"></van-icon>
     </div>
-     <!-- 底部区域 -->
+    <!-- 底部区域 -->
+
+    <!-- 发布评论 -->
+    <van-popup v-model="isPostShow"
+               position="bottom">
+        <post-comment />
+    </van-popup>
+
+    <!-- 发布评论 -->
   </div>
 </template>
 
@@ -61,6 +74,8 @@ import './github-markdown.css'
 import { ImagePreview } from 'vant'
 import { addFollow, deleteFollow } from '@/api/user'
 import { getArticle, addCollect, deleteCollect, addLike, deleteLike } from '@/api/article'
+import CommentList from './components/comment-list'
+import PostComment from './components/post-comment'
 
 export default {
   name: 'ArticleIndex',
@@ -152,14 +167,27 @@ export default {
     return {
       article: {}, // 文章数据对象
       isFollowLoading: false, // 关注用户按钮的loading状态
-      isCollectLoading: false // 收藏的loading状态
+      isCollectLoading: false, // 收藏的loading状态
+      isPostShow: false
     }
+  },
+  components: {
+    CommentList,
+    PostComment
   }
-
 }
 </script>
 
 <style scoped lang="less">
+.article-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 46px;
+  bottom: 44px;
+  overflow-y: auto;
+}
+
 .title {
   font-size: 20px;
   color: #3a3a3a;

@@ -3,6 +3,7 @@ import Vue from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import relativeTime from 'dayjs/plugin/relativeTime'
+// import { format } from 'core-js/core/date'
 
 // 配置使用处理相对时间
 dayjs.extend(relativeTime)
@@ -16,4 +17,8 @@ dayjs.locale('zh-cn')
 // 过滤器的返回值会渲染到使用过滤器的模板中
 Vue.filter('relativeTime', value => {
   return dayjs(value).from(dayjs())
+})
+
+Vue.filter('datetime', (value, format = 'YYYY-MM-DD HH:mm:ss') => {
+  return dayjs(value).format(format)
 })
