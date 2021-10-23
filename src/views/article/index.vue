@@ -32,7 +32,7 @@
            ref="article-content">
       </div>
       <!-- 文章评论列表 -->
-      <comment-list :source="articleId" />
+      <comment-list :source="articleId" :list="commentList" />
     </div>
 
     <!-- 底部区域 -->
@@ -43,7 +43,7 @@
                   round
                   size="small">写评论</van-button>
       <van-icon name="comment-o"
-                info="123"
+                :info="totalCommentCount"
                 color="#777" />
       <van-icon :color="article.is_collected ? 'orange' : '#777'"
                 @click="onCollect"
@@ -59,7 +59,7 @@
     <!-- 发布评论 -->
     <van-popup v-model="isPostShow"
                position="bottom">
-        <post-comment />
+        <post-comment :target="articleId" @post-success="onPostSuccess" @update-total-count="totalCommentCount = $event" />
     </van-popup>
 
     <!-- 发布评论 -->
@@ -161,6 +161,16 @@ export default {
       }
 
       this.$toast.success(`${this.article.is_collected ? '' : '取消'}点赞成功`)
+    },
+
+    onPostSuccess (comment) {
+      // 把发布成功的评论数据对象放到列表顶部
+      this.commentList.unshift(comment)
+
+      // 更新评论的总数量
+      this.totalCommentCount++
+      // 关闭发布评论弹出层
+      this.isPostShow = false
     }
   },
   data () {
@@ -168,7 +178,9 @@ export default {
       article: {}, // 文章数据对象
       isFollowLoading: false, // 关注用户按钮的loading状态
       isCollectLoading: false, // 收藏的loading状态
-      isPostShow: false
+      isPostShow: false,
+      commentList: [], // 文章评论数据
+      totalCommentCount: 0 // 评论总数量
     }
   },
   components: {

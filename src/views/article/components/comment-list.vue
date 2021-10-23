@@ -23,11 +23,17 @@ export default {
     source: {
       type: [Number, String, Object],
       require: true
+    },
+    list: {
+      type: Array,
+      // 数组或者对象的默认值必须通过函数返回
+      // default: []
+      default: () => []
     }
   },
   data () {
     return {
-      list: [],
+      // list: [],
       loading: false,
       finished: false,
       offset: null, // 获取下一页数据的页码
@@ -43,6 +49,7 @@ export default {
         offset: this.offset, // 不传默认从第一页读数据
         limit: this.limit
       })
+      this.$emit('update-total-count', data.data.total_count)
 
       // 2把数据放到列表
       const { results } = data.data
