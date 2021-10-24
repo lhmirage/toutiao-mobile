@@ -32,7 +32,10 @@
            ref="article-content">
       </div>
       <!-- 文章评论列表 -->
-      <comment-list :source="articleId" :list="commentList" />
+      <comment-list :source="articleId"
+                    @update-total-count="totalCommentCount = $event"
+                    @reply-click="onReplyClick"
+                    :list="commentList" />
     </div>
 
     <!-- 底部区域 -->
@@ -59,10 +62,21 @@
     <!-- 发布评论 -->
     <van-popup v-model="isPostShow"
                position="bottom">
-        <post-comment :target="articleId" @post-success="onPostSuccess" @update-total-count="totalCommentCount = $event" />
+      <post-comment :target="articleId"
+                    @post-success="onPostSuccess"
+                    @update-total-count="totalCommentCount = $event" />
     </van-popup>
 
     <!-- 发布评论 -->
+
+    <!-- 评论回复 -->
+    <!-- 使用v-if防止加载过的组件不重新渲染导致数据不会重新加载的问题 -->
+    <van-popup v-model="isReplyShow"
+               position="bottom">
+      <comment-reply v-if="isReplyShow"
+                     :comment="replyComment"
+                     @close="isReplyShow = false" />
+    </van-popup>
   </div>
 </template>
 
@@ -76,6 +90,7 @@ import { addFollow, deleteFollow } from '@/api/user'
 import { getArticle, addCollect, deleteCollect, addLike, deleteLike } from '@/api/article'
 import CommentList from './components/comment-list'
 import PostComment from './components/post-comment'
+import CommentReply from './components/comment-reply'
 
 export default {
   name: 'ArticleIndex',
@@ -171,6 +186,11 @@ export default {
       this.totalCommentCount++
       // 关闭发布评论弹出层
       this.isPostShow = false
+    },
+    onReplyClick (comment) {
+      this.replyComment = comment
+      // 展示回复内容
+      this.isReplyShow = true
     }
   },
   data () {
@@ -180,12 +200,15 @@ export default {
       isCollectLoading: false, // 收藏的loading状态
       isPostShow: false,
       commentList: [], // 文章评论数据
-      totalCommentCount: 0 // 评论总数量
+      totalCommentCount: 0, // 评论总数量
+      isReplyShow: false,
+      replyComment: {} // 当前评论回复对象
     }
   },
   components: {
     CommentList,
-    PostComment
+    PostComment,
+    CommentReply
   }
 }
 </script>
@@ -233,5 +256,34 @@ ul {
 .markdown-body {
   padding: 14px;
   background-color: #fff;
+}
+
+.article-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-sizing: border-box;
+  height: 44px;
+  border-top: 1px solid #d8d8d8;
+  background-color: #fff;
+  .comment-btn {
+    width: 141px;
+    height: 23px;
+    border: 1px solid #eeeeee;
+    font-size: 15px;
+    line-height: 23px;
+    color: #a7a7a7;
+  }
+  .van-icon {
+    font-size: 20px;
+    .van-info {
+      font-size: 11px;
+      background-color: #e22829;
+    }
+  }
 }
 </style>

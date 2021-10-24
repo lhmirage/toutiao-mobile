@@ -8,6 +8,7 @@
       <comment-item v-for="(comment, index) in list"
                     :key="index"
                     :comment="comment"
+                    @reply-click="$emit('reply-click', $event)"
                   />
     </van-list>
 
@@ -20,9 +21,15 @@ import CommentItem from './comment-item'
 export default {
   name: 'CommentList',
   props: {
+    // 如果获取文章评论,则传递文章ID
+    // 如果获取评论回复,则传递评论Id
     source: {
       type: [Number, String, Object],
       require: true
+    },
+    type: {
+      type: String,
+      default: 'a'
     },
     list: {
       type: Array,
@@ -44,8 +51,8 @@ export default {
     async onLoad () {
       // 1请求获取数据
       const { data } = await getComments({
-        type: 'a',
-        source: this.source, // 文章id或者评论id
+        type: this.type,
+        source: this.source.toString(), // 文章id或者评论id
         offset: this.offset, // 不传默认从第一页读数据
         limit: this.limit
       })
