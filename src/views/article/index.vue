@@ -75,6 +75,7 @@
                position="bottom">
       <comment-reply v-if="isReplyShow"
                      :comment="replyComment"
+                     :article-id="articleId"
                      @close="isReplyShow = false" />
     </van-popup>
   </div>
