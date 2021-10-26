@@ -5,12 +5,14 @@
                  left-arrow
                  @click-left="$router.back()" />
     <!--/导航栏-->
+    <input type="file" hidden accept="image/*" ref="file" @change="onFileChange">
+
     <van-cell title="头像"
               is-link
+              @click="$refs.file.click()"
               center>
       <van-image width="30"
                  height="30"
-                 I
                  round
                  fit="cover"
                  :src="user.photo" />
@@ -22,9 +24,11 @@
     </van-cell>
     <van-cell title="性别"
               is-link
+              @click="isEditGenderShow = true"
               :value="user.gender === 0 ? '男' : '女'"></van-cell>
     <van-cell title="生日"
               is-link
+              @click="isEditBirthdayShow = true"
               :value="user.birthday"></van-cell>
     <van-popup -model="isEditNameShow"
                position="bottom"
@@ -46,14 +50,33 @@
                    @close="isEditNameShow = false"
                    v-model="user.name" />
     </van-popup>
+
+  <!-- 修改性别 -->
+    <van-popup -model="isEditGenderShow"
+               position="bottom"
+               >
+               <update-gender v-model="user.gender" @close="isEditGenderShow = false" />
+    </van-popup>
+
+   <!-- 修改生日 -->
+   <van-popup -model="isEditBirthdayShow"
+               position="bottom"
+               >
+     <update-birthday v-if="isEditBirthdayShow" v-model="user.birthday" @close="isEditBirthdayShow = false" />
+    </van-popup>
+
+    <!-- 修改用户头像 -->
+
   </div>
 </template>
 
 <script>
 import { getUserProfile } from '@/api/user'
-import updateName from './components/update-name'
+import updateName from './components/update-name.vue'
+import UpdateGender from './components/update-gender.vue'
+import UpdateBirthday from './components/update-birthday.vue'
 export default {
-  components: { updateName },
+  components: { updateName, UpdateGender, UpdateBirthday },
   name: 'UserProfile',
   created () {
     this.loadUserProfile()
@@ -62,12 +85,18 @@ export default {
     loadUserProfile () {
       const { data } = getUserProfile()
       this.user = data.data
+    },
+    onFileChange () {
+      // 为了解决相同文件不触发change
+      this.$refs.file.value = ''
     }
   },
   data () {
     return {
       user: {},
-      isEditNameShow: false // 编辑昵称的选择按键
+      isEditNameShow: false, // 编辑昵称的选择按键
+      isEditGenderShow: false, // 编辑性别的显示状态
+      isEditBirthdayShow: false
     }
   }
 
