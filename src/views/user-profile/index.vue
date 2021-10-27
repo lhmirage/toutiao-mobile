@@ -5,7 +5,11 @@
                  left-arrow
                  @click-left="$router.back()" />
     <!--/导航栏-->
-    <input type="file" hidden accept="image/*" ref="file" @change="onFileChange">
+    <input type="file"
+           hidden
+           accept="image/*"
+           ref="file"
+           @change="onFileChange">
 
     <van-cell title="头像"
               is-link
@@ -51,22 +55,28 @@
                    v-model="user.name" />
     </van-popup>
 
-  <!-- 修改性别 -->
+    <!-- 修改性别 -->
     <van-popup -model="isEditGenderShow"
-               position="bottom"
-               >
-               <update-gender v-model="user.gender" @close="isEditGenderShow = false" />
+               position="bottom">
+      <update-gender v-model="user.gender"
+                     @close="isEditGenderShow = false" />
     </van-popup>
 
-   <!-- 修改生日 -->
-   <van-popup -model="isEditBirthdayShow"
-               position="bottom"
-               >
-     <update-birthday v-if="isEditBirthdayShow" v-model="user.birthday" @close="isEditBirthdayShow = false" />
+    <!-- 修改生日 -->
+    <van-popup -model="isEditBirthdayShow"
+               position="bottom">
+      <update-birthday v-if="isEditBirthdayShow"
+                       v-model="user.birthday"
+                       @close="isEditBirthdayShow = false" />
     </van-popup>
 
     <!-- 修改用户头像 -->
+    <van-popup -model="isEditPhotoShow"
+               position="bottom"
+               style="height: 100%">
+      <update-photo :image="previewImage" />
 
+    </van-popup>
   </div>
 </template>
 
@@ -75,8 +85,9 @@ import { getUserProfile } from '@/api/user'
 import updateName from './components/update-name.vue'
 import UpdateGender from './components/update-gender.vue'
 import UpdateBirthday from './components/update-birthday.vue'
+import UpdatePhoto from './components/update-photo.vue'
 export default {
-  components: { updateName, UpdateGender, UpdateBirthday },
+  components: { updateName, UpdateGender, UpdateBirthday, UpdatePhoto },
   name: 'UserProfile',
   created () {
     this.loadUserProfile()
@@ -87,6 +98,11 @@ export default {
       this.user = data.data
     },
     onFileChange () {
+      // 展示弹出层
+      this.isEditPhotoShow = true
+      // 在弹出层中预览图片
+      const blob = window.URL.createObjectURL(this.$refs.file.files[0])
+      this.previewImage = blob
       // 为了解决相同文件不触发change
       this.$refs.file.value = ''
     }
@@ -96,7 +112,9 @@ export default {
       user: {},
       isEditNameShow: false, // 编辑昵称的选择按键
       isEditGenderShow: false, // 编辑性别的显示状态
-      isEditBirthdayShow: false
+      isEditBirthdayShow: false,
+      isEditPhotoShow: false, // 编辑头像的显示状态
+      previewImage: null // 上传预览图片
     }
   }
 
