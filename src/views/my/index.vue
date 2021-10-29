@@ -77,7 +77,7 @@
     <van-cell class="mb-4"
               title="小智同学"
               is-link
-              to="/" />
+              to="/user/chat" />
     <van-cell v-if="user" @click="onlogout" class="logout-cell" title="退出登录" />
   </div>
 </template>
